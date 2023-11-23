@@ -22,10 +22,12 @@ float temp;
 std::vector<float> acel = {0.0, 0.0, 0.0};
 std::vector<float> giro = {0.0, 0.0, 0.0};
 std::vector<float> orientacao = {0.0, 0.0, 0.0};
+std::vector<float> acc_orientation_est = {0.0, 0.0, 0.0};
+std::vector<float> gyr_orientation_est = {0.0, 0.0, 0.0};
 std::vector<std::vector<float>> L = {
-  {0.0030, 0.0002, 0.0000},
-  {0.0003, 0.0143, 0.0001},
-  {0.0000, 0.0001, 0.0029}
+  {0.1182, 0.0000, 0.0000},
+  {0.0000, 0.1444, 0.0000},
+  {0.0000, 0.0000, 0.2376}
 };
 
 MPU9250 IMU(i2c0, 0x68);
@@ -44,7 +46,7 @@ void setup() {
   // calibrate_accel();
   // calibrate_gyro();
   // calibrate_mag();
-  ISF.setup_kalman_filter_in_steady_state(L);
+  ISF.setup_steady_state_kalman_filter(L);
   last_time = millis();
 }
 
@@ -65,21 +67,25 @@ void loop() {
   my = IMU.getMagY_uT();
   mz = IMU.getMagZ_uT();
   temp = IMU.getTemperature_C();
+
+  // 1) UTILIZADO PARA O ENSAIO (OBTENÇÃO DA MATRIZ L NO MATLAB)
+  // acc_orientation_est = ISF.accelerometer_orientation_estimation(acel);
+  // gyr_orientation_est = ISF.gyroscope_orientation_estimation(dt, giro);
   // printing_raw_data_on_the_serial();
-  
-  orientacao = ISF.kalman_filter_in_steady_state(dt, acel, giro);
+
+  // 2) OBTENÇÃO DA ORIENTAÇÃO DO SENSOR UTILIZANDO O SSKF (STEADY-STATE KALMAN FILTER).
+  //    Obs.: descomentar apenas depois da obtenção da matriz L no matlab
+  orientacao = ISF.steady_state_kalman_filter(dt, acel, giro);
   Serial.printf("Giro X: %.1f°  -  Giro Y: %.1f°  -  Giro Z: %.1f°\n", orientacao[0], orientacao[1], orientacao[2]);
   Serial.println();
-  
   delay(5);
 }
 
 
 void printing_raw_data_on_the_serial(){
-  // imprime os dados separados por ";" para criar um arquivo csv para o matlab
-  Serial.print(acel[0]); Serial.print(";"); Serial.print(acel[1]); Serial.print(";"); Serial.print(acel[2]); Serial.print(";");
-  Serial.print(giro[0]); Serial.print(";"); Serial.print(giro[1]); Serial.print(";"); Serial.print(giro[2]); Serial.print(";");
-  Serial.print(dt); Serial.print(";");
+  // imprime os dados separados por ";" para criar um arquivo csv para realizar os ensaios no o matlab
+  Serial.print(acc_orientation_est[0]); Serial.print(";"); Serial.print(acc_orientation_est[1]); Serial.print(";"); Serial.print(acc_orientation_est[2]); Serial.print(";");
+  Serial.print(gyr_orientation_est[0]); Serial.print(";"); Serial.print(gyr_orientation_est[1]); Serial.print(";"); Serial.print(gyr_orientation_est[2]); Serial.print(";");
   Serial.println();
 }
 

@@ -11,14 +11,18 @@ class Inertial_sensor_fusion{
 
     public:
         Inertial_sensor_fusion();
-        void setup_kalman_filter_in_steady_state(std::vector<std::vector<float>> L);
-        std::vector<float> kalman_filter_in_steady_state(float dt, std::vector<float> x, std::vector<float> u);
+        std::vector<float> accelerometer_orientation_estimation(std::vector<float> acel);
+        std::vector<float> gyroscope_orientation_estimation(float dt, std::vector<float> giro);
+        void setup_steady_state_kalman_filter(std::vector<std::vector<float>> L);
+        std::vector<float> steady_state_kalman_filter(float dt, std::vector<float> x, std::vector<float> u);
         
     private:
         uint8_t A;
         int16_t B;
         uint8_t C;
         uint8_t D;
+        std::vector<float> acc_orientation_est = {0.0, 0.0, 0.0};
+        std::vector<float> gyr_orientation_est = {0.0, 0.0, 0.0};
         std::vector<float> y = {0.0, 0.0, 0.0};
         std::vector<float> x_hat = {0.0, 0.0, 0.0};
         std::vector<float> y_hat = {0.0, 0.0, 0.0};
