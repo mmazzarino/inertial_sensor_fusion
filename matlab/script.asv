@@ -24,29 +24,27 @@ est_gx_by_gx = data.Var4;
 est_gy_by_gy = data.Var5;
 est_gz_by_gz = data.Var6;
 
+v11 = var(est_gx_by_ac);
+v22 = var(est_gy_by_ac);
+v33 = var(est_gz_by_ac);
 
-v11 = var(est_gx_by_ac)
-v22 = var(est_gy_by_ac)
-v33 = var(est_gz_by_ac)
-
-w11 = var(est_gx_by_gx)
-w22 = var(est_gy_by_gy)
-w33 = var(est_gz_by_gz)
+w1
 
 V = [  v11    0    0
          0  v22    0
-         0    0  v33  ]
+         0    0  v33  ];
      
-V = V*0.5
+%W = [  w11  0.0  0.0
+%       0.0  w22  0.0
+%       0.0  0.0  w33  ]
+     
+W = [  1  0  0
+       0  1  0
+       0  0  1  ]   
+   
 
-%W = [  1  0  0
-%       0  1  0
-%       0  0  1  ]   
-W = [  w11  0.0  0.0
-       0.0  w22  0.0
-       0.0  0.0  w33  ]
      
-W = W'*W;
+W = W'*W
 V = V'*V;
  
 %W = W*W

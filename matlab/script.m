@@ -24,53 +24,28 @@ est_gx_by_gx = data.Var4;
 est_gy_by_gy = data.Var5;
 est_gz_by_gz = data.Var6;
 
+v11 = var(est_gx_by_ac);
+v22 = var(est_gy_by_ac);
+v33 = var(est_gz_by_ac);
 
-v11 = var(est_gx_by_ac)
-v22 = var(est_gy_by_ac)
-v33 = var(est_gz_by_ac)
+w11 = var(est_gx_by_gx);
+w22 = var(est_gy_by_gy);
+w33 = var(est_gz_by_gz);
 
-w11 = var(est_gx_by_gx)
-w22 = var(est_gy_by_gy)
-w33 = var(est_gz_by_gz)
-
-V = [  v11    0    0
-         0  v22    0
-         0    0  v33  ]
+V = [  v11  0.0  0.0
+       0.0  v22  0.0
+       0.0  0.0  v33  ];
      
+%W = [  w11  0.0  0.0
+%       0.0  w22  0.0
+%       0.0  0.0  w33  ];
 
 W = [  1  0  0
        0  1  0
-       0  0  1  ]   
+       0  0  1  ];
    
-%W = W*0.9
-%W = [  w11  0.0  0.0
-%       0.0  w22  0.0
-%       0.0  0.0  w33  ]
-     
-W = W'*W
-V = V'*V;
- 
-%W = W*W
-%V = V*V
-     
-L = dlqr(A', C', W', V')'
-     
-%{
-ax = data.Var1;
-ay = data.Var2;
-az = data.Var3;
-gx = data.Var4;
-gy = data.Var5;
-gz = data.Var6;
-
-V = cov([ax, ay, az]);
-
-var_ax = var(ax)
-
-W = cov([gx, gy, gz]);
-
 W = W'.*W;
 V = V'.*V;
-
+     
 L = dlqr(A', C', W', V')';
-%}
+     
