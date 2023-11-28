@@ -31,4 +31,5 @@ class Inertial_sensor_fusion{
             {0.0003, 0.0143, 0.0001},
             {0.0000, 0.0001, 0.0029}
         };
+        float th = 0.0;
 };

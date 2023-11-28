@@ -1,10 +1,12 @@
 #include <Arduino.h>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <vector>
 #include "Wire.h"
 #include "external/ESP32_Arduino_MPU9250/MPU9250.h"
 #include "inertial_sensor_fusion/Inertial_sensor_fusion.h"
-
+#include <unistd.h>
 
 void printing_raw_data_on_the_serial();
 void calibrate_accel();
@@ -21,21 +23,23 @@ float temp;
 
 std::vector<float> acel = {0.0, 0.0, 0.0};
 std::vector<float> giro = {0.0, 0.0, 0.0};
+std::vector<float> mag = {0.0, 0.0, 0.0};
 std::vector<float> orientacao = {0.0, 0.0, 0.0};
 std::vector<float> acc_orientation_est = {0.0, 0.0, 0.0};
 std::vector<float> gyr_orientation_est = {0.0, 0.0, 0.0};
+
+// Matriz L obtida no Matlab a partir dos dados do ensaio
 std::vector<std::vector<float>> L = {
-  {0.1182, 0.0000, 0.0000},
-  {0.0000, 0.1444, 0.0000},
-  {0.0000, 0.0000, 0.2376}
+  {0.9112, 0.0000, 0.0000},
+  {0.0000, 0.6154, 0.0000},
+  {0.0000, 0.0000, 0.0006}
 };
 
 MPU9250 IMU(i2c0, 0x68);
 Inertial_sensor_fusion ISF;
 
-
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   if (IMU.begin() < 0){
     Serial.println("IMU initialization unsuccessful");
     while (1){}
@@ -43,9 +47,9 @@ void setup() {
   IMU.setAccelRange(MPU9250::ACCEL_RANGE_16G);
   IMU.setGyroRange(MPU9250::GYRO_RANGE_2000DPS);
   IMU.setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_184HZ);
-  // calibrate_accel();
-  // calibrate_gyro();
-  // calibrate_mag();
+  calibrate_accel();
+  calibrate_gyro();
+  calibrate_mag();
   ISF.setup_steady_state_kalman_filter(L);
   last_time = millis();
 }
@@ -63,29 +67,26 @@ void loop() {
   giro[0] = IMU.getGyroX_rads();
   giro[1] = IMU.getGyroY_rads();
   giro[2] = IMU.getGyroZ_rads();
-  mx = IMU.getMagX_uT();
-  my = IMU.getMagY_uT();
-  mz = IMU.getMagZ_uT();
+  mag[0] = IMU.getMagX_uT();
+  mag[1] = IMU.getMagY_uT();
+  mag[2] = IMU.getMagZ_uT();
   temp = IMU.getTemperature_C();
 
-  // 1) UTILIZADO PARA O ENSAIO (OBTENÇÃO DA MATRIZ L NO MATLAB)
+  orientacao = ISF.steady_state_kalman_filter(dt, acel, giro);
+  Serial.printf("%.2f;%.2f;%.2f;%.4f", orientacao[0], orientacao[1], orientacao[2], dt);
+  Serial.println();
+
+  //// UTILIZADO PARA O ENSAIO (OBTENÇÃO DA MATRIZ L NO MATLAB)
   // acc_orientation_est = ISF.accelerometer_orientation_estimation(acel);
   // gyr_orientation_est = ISF.gyroscope_orientation_estimation(dt, giro);
   // printing_raw_data_on_the_serial();
-
-  // 2) OBTENÇÃO DA ORIENTAÇÃO DO SENSOR UTILIZANDO O SSKF (STEADY-STATE KALMAN FILTER).
-  //    Obs.: descomentar apenas depois da obtenção da matriz L no matlab
-  orientacao = ISF.steady_state_kalman_filter(dt, acel, giro);
-  Serial.printf("Giro X: %.1f°  -  Giro Y: %.1f°  -  Giro Z: %.1f°\n", orientacao[0], orientacao[1], orientacao[2]);
-  Serial.println();
-  delay(5);
+  delay(20);
 }
 
 
 void printing_raw_data_on_the_serial(){
   // imprime os dados separados por ";" para criar um arquivo csv para realizar os ensaios no o matlab
-  Serial.print(acc_orientation_est[0]); Serial.print(";"); Serial.print(acc_orientation_est[1]); Serial.print(";"); Serial.print(acc_orientation_est[2]); Serial.print(";");
-  Serial.print(gyr_orientation_est[0]); Serial.print(";"); Serial.print(gyr_orientation_est[1]); Serial.print(";"); Serial.print(gyr_orientation_est[2]); Serial.print(";");
+  Serial.printf("%.5f;%.5f;%.5f;%.5f;%.5f;%.5f;%.5f", acc_orientation_est[0], acc_orientation_est[1], acc_orientation_est[2], gyr_orientation_est[0], gyr_orientation_est[1], gyr_orientation_est[2], dt);
   Serial.println();
 }
 
