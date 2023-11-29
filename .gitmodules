@@ -1,3 +1,1 @@
-[submodule "src/external/ESP32_Arduino_MPU9250"]
-	path = src/external/ESP32_Arduino_MPU9250
-	url = git@github.com:yelvlab/ESP32-Arduino-MPU9250.git
+
