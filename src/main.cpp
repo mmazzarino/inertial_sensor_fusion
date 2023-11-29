@@ -4,7 +4,7 @@
 #include <sstream>
 #include <vector>
 #include "Wire.h"
-#include "external/ESP32_Arduino_MPU9250/MPU9250.h"
+#include "external/inertial_measurement_unit/mpu9250/MPU9250.h"
 #include "inertial_sensor_fusion/Inertial_sensor_fusion.h"
 #include <unistd.h>
 

@@ -1,1 +1,4 @@
 
+[submodule "src/external/inertial_measurement_unit"]
+	path = src/external/inertial_measurement_unit
+	url = git@github.com:mmazzarino/inertial_measurement_unit.git
